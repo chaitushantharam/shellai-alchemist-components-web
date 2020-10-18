@@ -196,7 +196,8 @@ def generateHelmOverrides() {
                             """).trim().replace("\"", "")
             }
 
-            DEPLOYMENT_ID = dnsify("${IMAGE_TAG}-bld${env.BUILD_NUMBER}")
+            SHORTENED_IMAGE_TAG = shWithReturnValue("echo ${IMAGE_TAG}").take(12)
+            DEPLOYMENT_ID = dnsify("${SHORTENED_IMAGE_TAG}-bld${env.BUILD_NUMBER}")
             overrides.add("config.deploymentId=${DEPLOYMENT_ID}")
 
             def createdTimestamp = shWithReturnValue("""echo \$(date +\"%Y-%m-%d_%H-%M-%S\")""")
