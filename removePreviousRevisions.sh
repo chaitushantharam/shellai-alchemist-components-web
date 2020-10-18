@@ -9,6 +9,7 @@ set -o pipefail         # Use last non-zero exit code in a pipeline
 COMPONENT_NAME=""
 KSVC=""
 KREVISION=""
+TIMEOUT="60s"
 
 # DESC: Usage help
 # ARGS: None
@@ -71,19 +72,21 @@ function parse_params() {
 }
 
 function check_new_version_is_ready(){
+    TIMEOUT="200s"
+
     printf '\n[CONDITION CHECK] Revision: ContainerHealthy \n========================================================================\n' && \
-      kubectl --namespace ${NAMESPACE} wait --for=condition=ContainerHealthy ${KREVISION}  --timeout=120s
+      kubectl --namespace ${NAMESPACE} wait --for=condition=ContainerHealthy ${KREVISION}  --timeout=${TIMEOUT}
     printf '\n[CONDITION CHECK] Revision: Active condition \n========================================================================\n' && \
-      kubectl --namespace ${NAMESPACE} wait --for=condition=Active ${KREVISION}  --timeout=120s
+      kubectl --namespace ${NAMESPACE} wait --for=condition=Active ${KREVISION}  --timeout=${TIMEOUT}
     printf '\n[CONDITION CHECK] Revision: Ready condition \n========================================================================\n' && \
-      kubectl --namespace ${NAMESPACE} wait --for=condition=Ready ${KREVISION}  --timeout=120s
+      kubectl --namespace ${NAMESPACE} wait --for=condition=Ready ${KREVISION}  --timeout=${TIMEOUT}
 
     printf '\n[CONDITION CHECK] Service: ConfigurationsReady condition \n========================================================================\n' && \
-      kubectl --namespace ${NAMESPACE} wait --for=condition=ConfigurationsReady ${KSVC} --timeout=120s
+      kubectl --namespace ${NAMESPACE} wait --for=condition=ConfigurationsReady ${KSVC} --timeout=${TIMEOUT}
     printf '\n[CONDITION CHECK] Service: RoutesReady condition \n========================================================================\n' && \
-      kubectl --namespace ${NAMESPACE} wait --for=condition=RoutesReady ${KSVC} --timeout=120s
+      kubectl --namespace ${NAMESPACE} wait --for=condition=RoutesReady ${KSVC} --timeout=${TIMEOUT}
     printf '\n[CONDITION CHECK] Service: Ready condition \n========================================================================\n' && \
-      kubectl --namespace ${NAMESPACE} wait --for=condition=Ready ${KSVC} --timeout=120s
+      kubectl --namespace ${NAMESPACE} wait --for=condition=Ready ${KSVC} --timeout=${TIMEOUT}
 
     revisionActive=$(kubectl --namespace ${NAMESPACE} get revisions --selector="serving.knative.dev/service=${COMPONENT_NAME}" --sort-by=.metadata.creationTimestamp | tail +2 | wc -l)
     printf '\n========================================================================\n'
