@@ -1,0 +1,329 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "alchemist-web-new.fullname" . }}
+  namespace: alchemist
+  labels:
+    {{- include "alchemist-web-new.labels" . | nindent 4 }}
+    deploymentId: {{ .Values.config.deploymentId | quote }}
+    deployemntTimeStamp: {{ .Values.config.deploymentTimestamp | quote }}
+spec:
+  {{- if not .Values.deployment.webapp.autoscaling.enabled }}
+  replicas: {{ .Values.deployment.webapp.replicaCount }}
+  {{- end }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      {{- include "alchemist-web-new.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+    {{- with .Values.deployment.webapp.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "alchemist-web-new.selectorLabels" . | nindent 8 }}
+        deploymentId: {{ .Values.config.deploymentId | quote }}
+        deployemntTimeStamp: {{ .Values.config.deploymentTimestamp | quote }}
+      name: {{ include "alchemist-web-new.fullname" . }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "alchemist-web-new.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.deployment.webapp.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.deployment.webapp.securityContext | nindent 12 }}
+          image: "{{ .Values.deployment.webapp.image.repository }}:{{ .Values.deployment.webapp.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.deployment.webapp.image.pullPolicy }}
+          args:
+            - webapp
+          env:
+            - name: ALCHEMIST_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: ALCHEMIST_ENV
+            - name: CORPORATE_TENANT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: CORPORATE_TENANT
+            - name: CORPORATE_TENANT_2
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: CORPORATE_TENANT_2
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: ENVIRONMENT
+            - name: AAD_APP_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: AAD_APP_CLIENT_ID
+            - name: AAD_APP_CLIENT_ID_2
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: AAD_APP_CLIENT_ID_2
+            - name: AAD_APP_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: AAD_APP_CLIENT_SECRET
+            - name: AAD_APP_CLIENT_SECRET_2
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: AAD_APP_CLIENT_SECRET_2
+            - name: azure_client_secret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: azure_client_secret
+            - name: azure_tenant_id
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: azure_tenant_id
+            - name: celery_broker_url
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: celery_broker_url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: REDIS_URL
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: SECRET_KEY
+            - name: slack_api_token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: slack_api_token
+            - name: zema_username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: zema_username
+            - name: zema_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: zema_password
+            - name: sqlalchemy_url
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: sqlalchemy_url
+            - name: sqlalchemy_url_jenkins
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: sqlalchemy_url_jenkins
+            - name: datalake_name
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: datalake_name
+            - name: azure_client_id
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: azure_client_id
+            - name: istio_ingress_ip
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: istio_ingress_ip
+            - name: LOCAL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: LOCAL_USER
+            - name: sqlalchemy_ssl
+              value: "false"
+          ports:
+            - name: web-http
+              containerPort: {{ .Values.deployment.webapp.containerPort }}
+              protocol: TCP
+          #          livenessProbe:
+          #            httpGet:
+          #              path: /health
+          #              port: http
+          #            initialDelaySeconds: 5
+          #            periodSeconds: 5
+          #            failureThreshold: 20
+          #            timeoutSeconds: 5
+          #          readinessProbe:
+          #            httpGet:
+          #              path: /health
+          #              port: http
+          #            initialDelaySeconds: 5
+          #            periodSeconds: 5
+          #            failureThreshold: 20
+          #            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.deployment.webapp.resources | nindent 12 }}
+        - name: alchemist-huey
+          image: {{ .Values.deployment.webapp.image.repository }}:{{ .Values.deployment.webapp.image.tag }}
+          imagePullPolicy: {{ .Values.deployment.webapp.image.pullPolicy }}
+          args:
+            - huey
+          ports:
+            - name: huey-http
+              containerPort: {{ .Values.deployment.huey.containerPort }}
+              protocol: TCP
+          env:
+            - name: ALCHEMIST_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: ALCHEMIST_ENV
+            - name: CORPORATE_TENANT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: CORPORATE_TENANT
+            - name: CORPORATE_TENANT_2
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: CORPORATE_TENANT_2
+            - name: ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: ENVIRONMENT
+            - name: AAD_APP_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: AAD_APP_CLIENT_ID
+            - name: AAD_APP_CLIENT_ID_2
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: AAD_APP_CLIENT_ID_2
+            - name: AAD_APP_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: AAD_APP_CLIENT_SECRET
+            - name: AAD_APP_CLIENT_SECRET_2
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: AAD_APP_CLIENT_SECRET_2
+            - name: azure_client_secret
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: azure_client_secret
+            - name: azure_tenant_id
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: azure_tenant_id
+            - name: azure_client_secret_mahs
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: azure_client_secret_mahs
+            - name: azure_tenant_id_mahs
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: azure_tenant_id_mahs
+            - name: celery_broker_url
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: celery_broker_url
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: REDIS_URL
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: SECRET_KEY
+            - name: slack_api_token
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: slack_api_token
+            - name: zema_username
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: zema_username
+            - name: zema_password
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: zema_password
+            - name: sqlalchemy_url
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: sqlalchemy_url
+            - name: sqlalchemy_url_jenkins
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}
+                  key: sqlalchemy_url_jenkins
+            - name: datalake_name
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: datalake_name
+            - name: azure_client_id
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: azure_client_id
+            - name: istio_ingress_ip
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: istio_ingress_ip
+            - name: LOCAL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Release.Name }}
+                  key: LOCAL_USER
+            - name: sqlalchemy_ssl
+              value: "false"
+          resources:
+            {{- toYaml .Values.deployment.webapp.resources | nindent 12 }}
+      {{- with .Values.deployment.webapp.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.webapp.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.deployment.webapp.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,132 @@
+deployment:
+  webapp:
+    replicaCount: 1
+    deploymentType:
+      forced: false
+    image:
+      repository: shellai.azurecr.io/alchemist/task
+      pullPolicy: IfNotPresent
+      tag: "e4a4bb0c5ddfa19c3d5f21a86d658e7add43f602"
+    containerPort: 8000
+    podAnnotations: { }
+    podSecurityContext: { }
+    securityContext: { }
+    #  capabilities:
+    #    drop:
+    #      - ALL
+    #  readOnlyRootFilesystem: true
+    #  runAsNonRoot: true
+    #  runAsUser: 1000
+    serviceAccount:
+      create: true
+      annotations: { }
+      name: ""
+    service:
+      type: ClusterIP
+      port: 80
+    configmap:
+      data:
+        ALCHEMIST_ENV: "{{ env }}"
+        CORPORATE_TENANT: "shellcorp.onmicrosoft.com"
+        CORPORATE_TENANT_2: "shellcorp2.onmicrosoft.com"
+        ENVIRONMENT: "{{ env }}"
+        LOCAL_USER: "colm.oconnor@shell.com"
+        datalake_name: "{{ datalake_name }}"
+        azure_client_id: "{{ azure_client_id }}"
+        istio_ingress_ip: "{{ istio_ingress_ip }}"
+    ingress:
+      enabled: true
+      ############## Private DNS    #######################################
+      annotations:
+        kubernetes.io/ingress.class: nginx
+        certmanager.k8s.io/cluster-issuer: letsencrypt-prod-beagiledns
+        nginx.ingress.kubernetes.io/affinity: "cookie"
+        nginx.ingress.kubernetes.io/session-cookie-name: "route"
+        nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+        nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+        nginx.ingress.kubernetes.io/proxy-body-size: 20m
+        nginx.ingress.kubernetes.io/proxy-buffer-size: 128k
+        nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"
+        nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"
+      hosts:
+        - host: {{ host }}
+          paths:
+            - "/"
+      tls:
+        - secretName: alchemist-web-tls-secret
+          hosts:
+            - {{ host }}
+      #####################################################################
+      ############## Public DNS    #####################################################
+    #  annotations:
+    #    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
+    #    external-dns.alpha.kubernetes.io/target: {{ externalDnsTarget }}
+    #    nginx.ingress.kubernetes.io/proxy-body-size: 20m
+    #    nginx.ingress.kubernetes.io/proxy-buffer-size: 128k
+    #    nginx.ingress.kubernetes.io/proxy-read-timeout: "7200"
+    #    nginx.ingress.kubernetes.io/proxy-send-timeout: "7200"
+    #    nginx.ingress.kubernetes.io/affinity: "cookie"
+    #    nginx.ingress.kubernetes.io/session-cookie-name: "route"
+    #    nginx.ingress.kubernetes.io/session-cookie-expires: "172800"
+    #    nginx.ingress.kubernetes.io/session-cookie-max-age: "172800"
+    #  hosts:
+    #    - host: {{ host }}
+    #      paths:
+    #        - "/"
+    #  tls:
+    #    - secretName: alchemist-web-public-tls-secret
+    #      hosts:
+    #        - {{ host }}
+    resources:
+      limits:
+        cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('2', true) }}"
+        memory: "{{ (resources and resources.limits and resources.limits.memory) | default('4Gi', true)  }}"
+      requests:
+        cpu: "{{ (resources and resources.requests and resources.requests.cpu) | default('.5', true)  }}"
+        memory: "{{ (resources and resources.requests and resources.requests.memory) | default('500Mi', true)  }}"
+    autoscaling:
+      enabled: {{ autoscaling and autoscaling.enabled | default(false, true) }}
+      minReplicas: {{ autoscaling and autoscaling.minReplicas | default(1, true) }}
+      maxReplicas: {{ autoscaling and autoscaling.maxReplicas | default(2, true) }}
+      targetCPUUtilizationPercentage: 80
+      targetMemoryUtilizationPercentage: 80
+    nodeSelector: { }
+    tolerations: [ ]
+    affinity:
+      nodeAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          nodeSelectorTerms:
+            - matchExpressions:
+                - key: nvidia.com/gpu
+                  operator: DoesNotExist
+    ##################################################################################
+  huey:
+    containerPort: 8006
+
+config:
+  env: {{ env }}
+  deploymentId: "REPLACE.ME"
+  deploymentTimestamp: "REPLACE.ME"
+
+imagePullSecrets:
+  - name: shellai-secret
+
+knative:
+  task:
+    name: alchemist-task-new
+    image:
+      repository: shellai.azurecr.io/alchemist/task
+      tag: "e4a4bb0c5ddfa19c3d5f21a86d658e7add43f602"
+    containerPort: 8080
+    autoscaling:
+      minScale: "0"
+      maxScale: "10"
+      inflightRequests: "10"
+    resources:
+      limits:
+        cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('2', true) }}"
+        memory: "{{ (resources and resources.limits and resources.limits.memory) | default('4Gi', true)  }}"
+      requests:
+        cpu: "{{ (resources and resources.requests and resources.requests.cpu) | default('.5', true)  }}"
+        memory: "{{ (resources and resources.requests and resources.requests.memory) | default('500Mi', true)  }}"
+
