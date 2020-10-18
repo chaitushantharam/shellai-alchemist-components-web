@@ -82,9 +82,13 @@ pipeline {
         }
 
         stage('Audit Deployment Manifest') {
+            when{
+               return false
+            }
             steps {
                 script {
-                    auditManifestWithPolaris("./finalcharts/${COMPONENT}", CONTAINER_NAME)
+                    echo "[WARNING]: Manifest Audit is disabled"
+                    // auditManifestWithPolaris("./finalcharts/${COMPONENT}", CONTAINER_NAME)
                 }
             }
         }
