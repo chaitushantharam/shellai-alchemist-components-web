@@ -137,7 +137,7 @@ def template(String helmOverrides) {
 
         sh """
             ./shellai-jenkins-shared-lib/utilities/generate_manifest.py \
-            --template "./templates/${COMPONENT}-alchemist-web-new-values.yaml.jinja2.jinja2" \
+            --template "./templates/${COMPONENT}-values.yaml.jinja2" \
             --data "values_data.yaml" \
             --setkeys "${helmOverrides}" \
             --location "${LOCATION}" \
@@ -186,7 +186,7 @@ def generateHelmOverrides() {
                 overrides.add("image.tag=${IMAGE_TAG}")
             } else {
                 IMAGE_TAG = shWithReturnValue(""" 
-                                grep -m1 "tag:" ./templates/dashboard-alchemist-web-new-values.yaml.jinja2.jinja2 | awk -F":" '{ print \$2 }'| xargs
+                                grep -m1 "tag:" ./templates/${COMPONENT}-values.yaml.jinja2 | awk -F":" '{ print \$2 }'| xargs
                             """).trim().replace("\"", "")
             }
 
