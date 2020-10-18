@@ -82,8 +82,10 @@ pipeline {
         }
 
         stage('Audit Deployment Manifest') {
-            when{
-               return false
+            when {
+                expression {
+                    return false
+                }
             }
             steps {
                 script {
