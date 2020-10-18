@@ -313,6 +313,22 @@ spec:
                   key: LOCAL_USER
             - name: sqlalchemy_ssl
               value: "false"
+          #          livenessProbe:
+          #            httpGet:
+          #              path: /health
+          #              port: http
+          #            initialDelaySeconds: 5
+          #            periodSeconds: 5
+          #            failureThreshold: 20
+          #            timeoutSeconds: 5
+          #          readinessProbe:
+          #            httpGet:
+          #              path: /health
+          #              port: http
+          #            initialDelaySeconds: 5
+          #            periodSeconds: 5
+          #            failureThreshold: 20
+          #            timeoutSeconds: 5
           resources:
             {{- toYaml .Values.deployment.webapp.resources | nindent 12 }}
       {{- with .Values.deployment.webapp.nodeSelector }}
