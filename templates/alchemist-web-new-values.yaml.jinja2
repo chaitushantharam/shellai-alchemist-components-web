@@ -4,9 +4,9 @@ deployment:
     deploymentType:
       forced: false
     image:
-      repository: shellai.azurecr.io/alchemist/task
+      repository: shellai.azurecr.io/alchemist/alchemist-web
       pullPolicy: IfNotPresent
-      tag: "e4a4bb0c5ddfa19c3d5f21a86d658e7add43f602"
+      tag: "feature-shellai-migration-18102020-6"
     containerPort: 8000
     podAnnotations: { }
     podSecurityContext: { }
@@ -115,8 +115,8 @@ knative:
   task:
     name: alchemist-task-new
     image:
-      repository: shellai.azurecr.io/alchemist/task
-      tag: "e4a4bb0c5ddfa19c3d5f21a86d658e7add43f602"
+      repository: shellai.azurecr.io/alchemist/alchemist-web
+      tag: "feature-shellai-migration-18102020-6"
     containerPort: 8080
     autoscaling:
       minScale: "0"
