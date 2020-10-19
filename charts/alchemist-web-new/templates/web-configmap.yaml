@@ -11,6 +11,7 @@ data:
   datalake_name: "{{ .Values.deployment.webapp.configmap.data.datalake_name }}"
   azure_client_id: "{{ .Values.deployment.webapp.configmap.data.azure_client_id }}"
   istio_ingress_ip: "{{ .Values.deployment.webapp.configmap.data.istio_ingress_ip }}"
+  HUEY_TASK_SERVICE_HOST: "http://{{ .Values.knative.task.name }}.alchemist.svc.cluster.local"
 {{- if .Values.deployment.webapp.configmap.data.LOCAL_USER }}
   LOCAL_USER: "{{ .Values.deployment.webapp.configmap.data.LOCAL_USER }}"
 {{- end }}

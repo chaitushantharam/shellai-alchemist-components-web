@@ -9,7 +9,6 @@ westeurope:
     externalDnsTarget: "panfw.we.dev.001.rds-beagile.com"
     azure_client_id: 9bb60fa3-798a-462b-813c-aca590308173
     datalake_name: alchemistdldev
-    istio_ingress_ip: 10.227.33.11
   staging:
     env: "staging"
     host: web.alchemist.westeurope.staging.001.private.rds-beagile.com
@@ -20,7 +19,6 @@ westeurope:
     externalDnsTarget: "panfw.we.staging.001.rds-beagile.com"
     azure_client_id: 9bb60fa3-798a-462b-813c-aca590308173
     datalake_name: alchemistdldev
-    istio_ingress_ip: 10.230.97.9
   preprod:
     env: "preprod"
     host: web.alchemist.westeurope.preprod.rds-beagile.com
@@ -31,7 +29,6 @@ westeurope:
     externalDnsTarget: "panfw.we.preprod.001.rds-beagile.com"
     azure_client_id: 9bb60fa3-798a-462b-813c-aca590308173
     datalake_name: alchemistdldev
-    istio_ingress_ip: 10.227.33.11
   prod:
     env: "prod"
     host: web.alchemist.westeurope.prod.rds-beagile.com
@@ -42,4 +39,3 @@ westeurope:
     externalDnsTarget: "panfw.we.prod.001.rds-beagile.com"
     azure_client_id: 9bb60fa3-798a-462b-813c-aca590308173
     datalake_name: alchemistdldev
-    istio_ingress_ip: 10.227.33.11

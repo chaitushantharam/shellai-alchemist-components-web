@@ -193,7 +193,8 @@ def generateHelmOverrides() {
         script {
             echo "IMAGE_TAG: |${IMAGE_TAG}|"
             if (!['', null, 'null'].contains(IMAGE_TAG)) {
-                overrides.add("image.tag=${IMAGE_TAG}")
+                overrides.add("deployment.webapp.image.tag=${IMAGE_TAG}")
+                overrides.add("knative.task.image.tag=${IMAGE_TAG}")
             } else {
                 IMAGE_TAG = shWithReturnValue(""" 
                                 grep -m1 "tag:" ./templates/${COMPONENT}-values.yaml.jinja2 | awk -F":" '{ print \$2 }'| xargs

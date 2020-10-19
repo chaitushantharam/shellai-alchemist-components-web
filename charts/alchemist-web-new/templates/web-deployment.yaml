@@ -147,11 +147,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Release.Name }}
                   key: azure_client_id
-            - name: istio_ingress_ip
+            - name: HUEY_TASK_SERVICE_HOST
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Release.Name }}
-                  key: istio_ingress_ip
+                  key: HUEY_TASK_SERVICE_HOST
             - name: LOCAL_USER
               valueFrom:
                 configMapKeyRef:
@@ -301,11 +301,11 @@ spec:
                 configMapKeyRef:
                   name: {{ .Release.Name }}
                   key: azure_client_id
-            - name: istio_ingress_ip
+            - name: HUEY_TASK_SERVICE_HOST
               valueFrom:
                 configMapKeyRef:
                   name: {{ .Release.Name }}
-                  key: istio_ingress_ip
+                  key: HUEY_TASK_SERVICE_HOST
             - name: LOCAL_USER
               valueFrom:
                 configMapKeyRef:
