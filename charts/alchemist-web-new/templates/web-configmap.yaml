@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}
+  namespace: alchemist
+data:
+  ALCHEMIST_ENV: "{{ .Values.deployment.webapp.configmap.data.ALCHEMIST_ENV }}"
+  CORPORATE_TENANT: "{{ .Values.deployment.webapp.configmap.data.CORPORATE_TENANT }}"
+  CORPORATE_TENANT_2: "{{ .Values.deployment.webapp.configmap.data.CORPORATE_TENANT_2 }}"
+  ENVIRONMENT: "{{ .Values.deployment.webapp.configmap.data.ENVIRONMENT }}"
+  datalake_name: "{{ .Values.deployment.webapp.configmap.data.datalake_name }}"
+  azure_client_id: "{{ .Values.deployment.webapp.configmap.data.azure_client_id }}"
+  istio_ingress_ip: "{{ .Values.deployment.webapp.configmap.data.istio_ingress_ip }}"
+{{- if .Values.deployment.webapp.configmap.data.LOCAL_USER }}
+  LOCAL_USER: "{{ .Values.deployment.webapp.configmap.data.LOCAL_USER }}"
+{{- end }}

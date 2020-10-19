@@ -1,0 +1,182 @@
+apiVersion: serving.knative.dev/v1beta1
+kind: Service
+metadata:
+  name: "{{ .Values.knative.task.name }}"
+  namespace: alchemist
+  labels:
+    app.kubernetes.io/name: "{{ .Values.knative.task.name }}"
+    app.kubernetes.io/instance: "{{ .Values.knative.task.name }}"
+spec:
+  template:
+    metadata:
+      namespace: alchemist
+      name: "{{ .Values.knative.task.name }}-{{ .Values.config.deploymentId }}"
+      labels:
+        version: "{{ .Values.knative.task.image.tag }}"
+      annotations:
+        # Knative concurrency-based autoscaling
+        autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
+        autoscaling.knative.dev/metric: concurrency
+        # Target number of in-flight requests per pod.
+        autoscaling.knative.dev/target: {{ .Values.knative.task.autoscaling.inflightRequests | quote }}
+        # Enable scale to zero by commenting out minScale
+        autoscaling.knative.dev/minScale: {{ .Values.knative.task.autoscaling.minScale | quote }}
+        # Limit scaling to 10 pods.
+        autoscaling.knative.dev/maxScale: {{ .Values.knative.task.autoscaling.maxScale | quote }}
+    spec:
+      serviceAccountName: "{{ .Values.knative.task.name }}"
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+          - image: "{{ .Values.knative.task.image.repository }}:{{ .Values.knative.task.tag }}"
+            args:
+              - kangaroo
+            imagePullPolicy: IfNotPresent
+            ports:
+              - protocol: TCP
+                containerPort: {{ .Values.knative.task.containerPort }}
+            resources:
+              {{- toYaml .Values.knative.task.resources | nindent 14 }}
+            readinessProbe:
+              httpGet:
+                path: /health
+              initialDelaySeconds: 10
+              periodSeconds: 10
+              failureThreshold: 10
+              timeoutSeconds: 10
+            livenessProbe:
+              httpGet:
+                path: /health
+              initialDelaySeconds: 10
+              periodSeconds: 10
+              failureThreshold: 5
+              timeoutSeconds: 10
+            env:
+              - name: MODULE_NAME
+                value: "{{ .Values.knative.task.name }}"
+              - name: K_SERVICE_URL
+                value: "{{ .Values.knative.task.name }}.alchemist.svc.cluster.local"
+              - name: REVISION_NAME
+                value: "{{ .Values.knative.task.revisionName }}"
+              - name: DNS_PREFIX
+                value: "{{ .Values.knative.task.dnsPrefix }}"
+              - name: ALCHEMIST_ENV
+                valueFrom:
+                  configMapKeyRef:
+                    name: {{ .Release.Name }}
+                    key: ALCHEMIST_ENV
+              - name: CORPORATE_TENANT
+                valueFrom:
+                  configMapKeyRef:
+                    name: {{ .Release.Name }}
+                    key: CORPORATE_TENANT
+              - name: CORPORATE_TENANT_2
+                valueFrom:
+                  configMapKeyRef:
+                    name: {{ .Release.Name }}
+                    key: CORPORATE_TENANT_2
+              - name: ENVIRONMENT
+                valueFrom:
+                  configMapKeyRef:
+                    name: {{ .Release.Name }}
+                    key: ENVIRONMENT
+              - name: AAD_APP_CLIENT_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: AAD_APP_CLIENT_ID
+              - name: AAD_APP_CLIENT_ID_2
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: AAD_APP_CLIENT_ID_2
+              - name: AAD_APP_CLIENT_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: AAD_APP_CLIENT_SECRET
+              - name: AAD_APP_CLIENT_SECRET_2
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: AAD_APP_CLIENT_SECRET_2
+              - name: azure_client_secret
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: azure_client_secret
+              - name: azure_tenant_id
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: azure_tenant_id
+              - name: azure_client_secret_mahs
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: azure_client_secret_mahs
+              - name: azure_tenant_id_mahs
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: azure_tenant_id_mahs
+              - name: celery_broker_url
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: celery_broker_url
+              - name: REDIS_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: REDIS_URL
+              - name: SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: SECRET_KEY
+              - name: slack_api_token
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: slack_api_token
+              - name: zema_username
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: zema_username
+              - name: zema_password
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: zema_password
+              - name: sqlalchemy_url
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: sqlalchemy_url
+              - name: sqlalchemy_url_jenkins
+                valueFrom:
+                  secretKeyRef:
+                    name: {{ .Release.Name }}
+                    key: sqlalchemy_url_jenkins
+              - name: sqlalchemy_ssl
+                value: "false"
+              - name: LOCAL_USER
+                valueFrom:
+                  configMapKeyRef:
+                    name: {{ .Release.Name }}
+                    key: LOCAL_USER
+              - name: datalake_name
+                valueFrom:
+                  configMapKeyRef:
+                    name: {{ .Release.Name }}
+                    key: datalake_name
+              - name: azure_client_id
+                valueFrom:
+                  configMapKeyRef:
+                    name: {{ .Release.Name }}
+                    key: azure_client_id
+      timeoutSeconds: 600

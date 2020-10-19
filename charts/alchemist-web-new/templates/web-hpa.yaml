@@ -1,0 +1,29 @@
+{{- if .Values.deployment.webapp.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  namespace: alchemist
+  name: {{ include "alchemist-web-new.fullname" . }}
+  labels:
+    {{- include "alchemist-web-new.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "alchemist-web-new.fullname" . }}
+  minReplicas: {{ .Values.deployment.webapp.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.deployment.webapp.autoscaling.maxReplicas }}
+  metrics:
+  {{- if .Values.deployment.webapp.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.deployment.webapp.autoscaling.targetCPUUtilizationPercentage }}
+  {{- end }}
+  {{- if .Values.deployment.webapp.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.deployment.webapp.autoscaling.targetMemoryUtilizationPercentage }}
+  {{- end }}
+{{- end }}
