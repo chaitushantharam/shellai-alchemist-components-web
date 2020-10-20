@@ -1,6 +1,6 @@
 westeurope:
   dev:
-    env: "dev"
+    env: "DEV"
     host: web.alchemist.westeurope.dev.001.private.rds-beagile.com
     autoscaling:
       enabled: false
@@ -10,7 +10,7 @@ westeurope:
     azure_client_id: 9bb60fa3-798a-462b-813c-aca590308173
     datalake_name: alchemistdldev
   staging:
-    env: "staging"
+    env: "STAGING"
     host: web.alchemist.westeurope.staging.001.private.rds-beagile.com
     autoscaling:
       enabled: true
@@ -20,7 +20,7 @@ westeurope:
     azure_client_id: 9bb60fa3-798a-462b-813c-aca590308173
     datalake_name: alchemistdldev
   preprod:
-    env: "preprod"
+    env: "PREPROD"
     host: web.alchemist.westeurope.preprod.rds-beagile.com
     autoscaling:
       enabled: true
@@ -30,7 +30,7 @@ westeurope:
     azure_client_id: 9bb60fa3-798a-462b-813c-aca590308173
     datalake_name: alchemistdldev
   prod:
-    env: "prod"
+    env: "PROD"
     host: web.alchemist.westeurope.prod.rds-beagile.com
     autoscaling:
       enabled: true
