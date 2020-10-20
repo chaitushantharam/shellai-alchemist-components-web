@@ -6,7 +6,7 @@ deployment:
     image:
       repository: shellai.azurecr.io/alchemist/alchemist-web
       pullPolicy: IfNotPresent
-      tag: "dev-19102020-7"
+      tag: "dev-20102020-12"
     containerPort: 8000
     podAnnotations: { }
     podSecurityContext: { }
@@ -116,7 +116,7 @@ knative:
     name: alchemist-task-new
     image:
       repository: shellai.azurecr.io/alchemist/alchemist-web
-      tag: "dev-19102020-7"
+      tag: "dev-20102020-12"
     containerPort: 8080
     autoscaling:
       minScale: "1"
@@ -124,9 +124,23 @@ knative:
       inflightRequests: "10"
     resources:
       limits:
-        cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('28', true) }}"
-        memory: "{{ (resources and resources.limits and resources.limits.memory) | default('8Gi', true)  }}"
+        cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('2', true) }}"
+        memory: "{{ (resources and resources.limits and resources.limits.memory) | default('1Gi', true)  }}"
       requests:
-        cpu: "{{ (resources and resources.requests and resources.requests.cpu) | default('28', true)  }}"
-        memory: "{{ (resources and resources.requests and resources.requests.memory) | default('8Gi', true)  }}"
+        cpu: "{{ (resources and resources.requests and resources.requests.cpu) | default('2', true)  }}"
+        memory: "{{ (resources and resources.requests and resources.requests.memory) | default('1Gi', true)  }}"
+
+
+jobs:
+  statTest:
+    image:
+      repository: shellai.azurecr.io/alchemist/alchemist-web
+      tag: "dev-20102020-12"
+    resources:
+      limits:
+        cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('2', true) }}"
+        memory: "{{ (resources and resources.limits and resources.limits.memory) | default('1Gi', true)  }}"
+      requests:
+        cpu: "{{ (resources and resources.requests and resources.requests.cpu) | default('2', true)  }}"
+        memory: "{{ (resources and resources.requests and resources.requests.memory) | default('1Gi', true)  }}"
 

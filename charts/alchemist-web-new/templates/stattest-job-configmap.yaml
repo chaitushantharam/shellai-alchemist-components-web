@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alchemist-jobs
+  namespace: alchemist
+data:
+  STATTEST_CPU_LIMITS: "{{ .Values.jobs.statTest.resources.limits.cpu }}"
+  STATTEST_CPU_REQUESTS: "{{ .Values.jobs.statTest.resources.requests.cpu }}"
+  STATTEST_MEMORY_LIMITS: "{{ .Values.jobs.statTest.resources.limits.memory }}"
+  STATTEST_MEMORY_REQUESTS: "{{ .Values.jobs.statTest.resources.requests.memory }}"
+  STATTEST_DOCKER_IMAGE: "{{ .Values.jobs.statTest.image.repository }}:{{ .Values.jobs.statTest.image.tag }}"
+  sqlalchemy_ssl: "false"

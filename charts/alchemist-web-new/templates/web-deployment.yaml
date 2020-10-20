@@ -35,7 +35,8 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "alchemist-web-new.serviceAccountName" . }}
+#      serviceAccountName: {{ include "alchemist-web-new.serviceAccountName" . }}
+      serviceAccountName: alchemist-jenkins-acc
       securityContext:
         {{- toYaml .Values.deployment.webapp.podSecurityContext | nindent 8 }}
       containers:
@@ -46,119 +47,13 @@ spec:
           imagePullPolicy: {{ .Values.deployment.webapp.image.pullPolicy }}
           args:
             - webapp
-          env:
-            - name: ALCHEMIST_ENV
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: ALCHEMIST_ENV
-            - name: CORPORATE_TENANT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: CORPORATE_TENANT
-            - name: CORPORATE_TENANT_2
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: CORPORATE_TENANT_2
-            - name: ENVIRONMENT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: ENVIRONMENT
-            - name: AAD_APP_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: AAD_APP_CLIENT_ID
-            - name: AAD_APP_CLIENT_ID_2
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: AAD_APP_CLIENT_ID_2
-            - name: AAD_APP_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: AAD_APP_CLIENT_SECRET
-            - name: AAD_APP_CLIENT_SECRET_2
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: AAD_APP_CLIENT_SECRET_2
-            - name: azure_client_secret
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: azure_client_secret
-            - name: azure_tenant_id
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: azure_tenant_id
-            - name: celery_broker_url
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: celery_broker_url
-            - name: REDIS_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: REDIS_URL
-            - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: SECRET_KEY
-            - name: slack_api_token
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: slack_api_token
-            - name: zema_username
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: zema_username
-            - name: zema_password
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: zema_password
-            - name: sqlalchemy_url
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: sqlalchemy_url
-            - name: sqlalchemy_url_jenkins
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: sqlalchemy_url_jenkins
-            - name: datalake_name
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: datalake_name
-            - name: azure_client_id
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: azure_client_id
-            - name: HUEY_TASK_SERVICE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: HUEY_TASK_SERVICE_HOST
-            - name: LOCAL_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: LOCAL_USER
-            - name: sqlalchemy_ssl
-              value: "false"
+          envFrom:
+            - secretRef:
+                name: alchemist-web-new
+            - configMapRef:
+                name: alchemist-web-new
+            - configMapRef:
+                name: alchemist-jobs
           ports:
             - name: web-http
               containerPort: {{ .Values.deployment.webapp.containerPort }}
@@ -190,129 +85,13 @@ spec:
             - name: huey-http
               containerPort: {{ .Values.deployment.huey.containerPort }}
               protocol: TCP
-          env:
-            - name: ALCHEMIST_ENV
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: ALCHEMIST_ENV
-            - name: CORPORATE_TENANT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: CORPORATE_TENANT
-            - name: CORPORATE_TENANT_2
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: CORPORATE_TENANT_2
-            - name: ENVIRONMENT
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: ENVIRONMENT
-            - name: AAD_APP_CLIENT_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: AAD_APP_CLIENT_ID
-            - name: AAD_APP_CLIENT_ID_2
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: AAD_APP_CLIENT_ID_2
-            - name: AAD_APP_CLIENT_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: AAD_APP_CLIENT_SECRET
-            - name: AAD_APP_CLIENT_SECRET_2
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: AAD_APP_CLIENT_SECRET_2
-            - name: azure_client_secret
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: azure_client_secret
-            - name: azure_tenant_id
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: azure_tenant_id
-            - name: azure_client_secret_mahs
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: azure_client_secret_mahs
-            - name: azure_tenant_id_mahs
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: azure_tenant_id_mahs
-            - name: celery_broker_url
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: celery_broker_url
-            - name: REDIS_URL
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: REDIS_URL
-            - name: SECRET_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: SECRET_KEY
-            - name: slack_api_token
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: slack_api_token
-            - name: zema_username
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: zema_username
-            - name: zema_password
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: zema_password
-            - name: sqlalchemy_url
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: sqlalchemy_url
-            - name: sqlalchemy_url_jenkins
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Release.Name }}
-                  key: sqlalchemy_url_jenkins
-            - name: datalake_name
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: datalake_name
-            - name: azure_client_id
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: azure_client_id
-            - name: HUEY_TASK_SERVICE_HOST
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: HUEY_TASK_SERVICE_HOST
-            - name: LOCAL_USER
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Release.Name }}
-                  key: LOCAL_USER
-            - name: sqlalchemy_ssl
-              value: "false"
+          envFrom:
+            - secretRef:
+                name: alchemist-web-new
+            - configMapRef:
+                name: alchemist-web-new
+            - configMapRef:
+                    name: alchemist-jobs
           #          livenessProbe:
           #            httpGet:
           #              path: /health
