@@ -4,6 +4,7 @@ metadata:
   name: {{ .Release.Name }}
   namespace: alchemist
 data:
+#  make sure the key is the same as the environment variable in the code
   ALCHEMIST_ENV: "{{ .Values.deployment.webapp.configmap.data.ALCHEMIST_ENV }}"
   CORPORATE_TENANT: "{{ .Values.deployment.webapp.configmap.data.CORPORATE_TENANT }}"
   CORPORATE_TENANT_2: "{{ .Values.deployment.webapp.configmap.data.CORPORATE_TENANT_2 }}"
@@ -16,3 +17,4 @@ data:
   LOCAL_USER: "{{ .Values.deployment.webapp.configmap.data.LOCAL_USER }}"
 {{- end }}
   sqlalchemy_ssl: 'false'
+  PLATFORM: 'shell.ai'

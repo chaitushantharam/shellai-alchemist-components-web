@@ -84,6 +84,9 @@ function get_secret_from_keyvault() {
 
 function create_secret() {
     pretty_print "Creating secret..."
+
+# make sure the key is the same as the environment variable in the code
+
     kubectl create secret generic "${SECRET_NAME}" \
         --namespace ${NAMESPACE} \
         --from-literal AAD_APP_CLIENT_ID=$(get_secret_from_keyvault "AADAPPCLIENTID") \
