@@ -6,7 +6,7 @@ deployment:
     image:
       repository: shellai.azurecr.io/alchemist/alchemist-web
       pullPolicy: IfNotPresent
-      tag: "dev-20102020-12"
+      tag: "dev-20102020-14"
     containerPort: 8000
     podAnnotations: { }
     podSecurityContext: { }
@@ -116,7 +116,7 @@ knative:
     name: alchemist-task-new
     image:
       repository: shellai.azurecr.io/alchemist/alchemist-web
-      tag: "dev-20102020-12"
+      tag: "dev-20102020-14"
     containerPort: 8080
     autoscaling:
       minScale: "1"
@@ -135,7 +135,7 @@ jobs:
   statTest:
     image:
       repository: shellai.azurecr.io/alchemist/alchemist-web
-      tag: "dev-20102020-12"
+      tag: "dev-20102020-14"
     resources:
       limits:
         cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('2', true) }}"
