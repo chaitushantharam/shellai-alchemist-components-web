@@ -9,6 +9,6 @@ data:
   STATTEST_CPU_REQUESTS: "{{ .Values.jobs.statTest.resources.requests.cpu }}"
   STATTEST_MEMORY_LIMITS: "{{ .Values.jobs.statTest.resources.limits.memory }}"
   STATTEST_MEMORY_REQUESTS: "{{ .Values.jobs.statTest.resources.requests.memory }}"
-  STATTEST_DOCKER_IMAGE: "{{ .Values.jobs.statTest.image.repository }}:{{ .Values.jobs.statTest.image.tag }}"
+  STATTEST_DOCKER_IMAGE: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
 #  make it to true when we move to production
   sqlalchemy_ssl: "false"

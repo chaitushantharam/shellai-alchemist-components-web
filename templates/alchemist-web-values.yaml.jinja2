@@ -3,10 +3,6 @@ deployment:
     replicaCount: 1
     deploymentType:
       forced: false
-    image:
-      repository: shellai.azurecr.io/alchemist/alchemist-web
-      pullPolicy: IfNotPresent
-      tag: "dev-21102020-21"
     containerPort: 8000
     podAnnotations: { }
     podSecurityContext: { }
@@ -108,15 +104,17 @@ config:
   deploymentId: "REPLACE.ME"
   deploymentTimestamp: "REPLACE.ME"
 
+image:
+  repository: shellai.azurecr.io/alchemist/alchemist-web
+  pullPolicy: IfNotPresent
+  tag: "dev-23102020-28"
+
 imagePullSecrets:
   - name: shellai-secret
 
 knative:
   task:
     name: alchemist-task
-    image:
-      repository: shellai.azurecr.io/alchemist/alchemist-web
-      tag: "dev-21102020-21"
     containerPort: 8080
     autoscaling:
       minScale: "0"
@@ -133,9 +131,6 @@ knative:
 
 jobs:
   statTest:
-    image:
-      repository: shellai.azurecr.io/alchemist/alchemist-web
-      tag: "dev-21102020-21"
     resources:
       limits:
         cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('28', true) }}"

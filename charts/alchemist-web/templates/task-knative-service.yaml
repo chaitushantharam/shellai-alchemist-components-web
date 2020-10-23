@@ -30,7 +30,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       containers:
-          - image: "{{ .Values.knative.task.image.repository }}:{{ .Values.knative.task.tag }}"
+          - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             args:
               - kangaroo
             imagePullPolicy: IfNotPresent
