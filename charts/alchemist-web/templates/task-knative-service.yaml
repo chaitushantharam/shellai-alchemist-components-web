@@ -64,9 +64,9 @@ spec:
                 value: "{{ .Values.knative.task.dnsPrefix }}"
             envFrom:
               - secretRef:
-                  name: alchemist-web-new
+                  name: alchemist-web
               - configMapRef:
-                  name: alchemist-web-new
+                  name: alchemist-web
               - configMapRef:
                   name: alchemist-jobs
       timeoutSeconds: 600

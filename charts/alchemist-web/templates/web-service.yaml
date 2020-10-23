@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "alchemist-web-new.fullname" . }}
+  name: {{ include "alchemist-web.fullname" . }}
   labels:
-    {{- include "alchemist-web-new.labels" . | nindent 4 }}
+    {{- include "alchemist-web.labels" . | nindent 4 }}
   namespace: alchemist
 spec:
   type: {{ .Values.deployment.webapp.service.type }}
@@ -13,4 +13,4 @@ spec:
       protocol: TCP
       name: svc-http
   selector:
-    {{- include "alchemist-web-new.selectorLabels" . | nindent 4 }}
+    {{- include "alchemist-web.selectorLabels" . | nindent 4 }}

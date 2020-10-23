@@ -3,14 +3,14 @@ apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
   namespace: alchemist
-  name: {{ include "alchemist-web-new.fullname" . }}
+  name: {{ include "alchemist-web.fullname" . }}
   labels:
-    {{- include "alchemist-web-new.labels" . | nindent 4 }}
+    {{- include "alchemist-web.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "alchemist-web-new.fullname" . }}
+    name: {{ include "alchemist-web.fullname" . }}
   minReplicas: {{ .Values.deployment.webapp.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.deployment.webapp.autoscaling.maxReplicas }}
   metrics:

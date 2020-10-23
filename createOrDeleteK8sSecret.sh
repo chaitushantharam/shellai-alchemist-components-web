@@ -7,7 +7,7 @@ set -o pipefail         # Use last non-zero exit code in a pipeline
 #set -o xtrace          # Trace the execution of the script (debug)
 
 
-SECRET_NAME="alchemist-web-new"
+SECRET_NAME="alchemist-web"
 
 
 # DESC: Usage help

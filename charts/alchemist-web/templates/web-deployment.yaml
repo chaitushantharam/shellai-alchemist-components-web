@@ -1,10 +1,10 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "alchemist-web-new.fullname" . }}
+  name: {{ include "alchemist-web.fullname" . }}
   namespace: alchemist
   labels:
-    {{- include "alchemist-web-new.labels" . | nindent 4 }}
+    {{- include "alchemist-web.labels" . | nindent 4 }}
     deploymentId: {{ .Values.config.deploymentId | quote }}
     deployemntTimeStamp: {{ .Values.config.deploymentTimestamp | quote }}
 spec:
@@ -18,7 +18,7 @@ spec:
       maxSurge: 1
   selector:
     matchLabels:
-      {{- include "alchemist-web-new.selectorLabels" . | nindent 6 }}
+      {{- include "alchemist-web.selectorLabels" . | nindent 6 }}
   template:
     metadata:
     {{- with .Values.deployment.webapp.podAnnotations }}
@@ -26,16 +26,16 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "alchemist-web-new.selectorLabels" . | nindent 8 }}
+        {{- include "alchemist-web.selectorLabels" . | nindent 8 }}
         deploymentId: {{ .Values.config.deploymentId | quote }}
         deployemntTimeStamp: {{ .Values.config.deploymentTimestamp | quote }}
-      name: {{ include "alchemist-web-new.fullname" . }}
+      name: {{ include "alchemist-web.fullname" . }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-#      serviceAccountName: {{ include "alchemist-web-new.serviceAccountName" . }}
+#      serviceAccountName: {{ include "alchemist-web.serviceAccountName" . }}
       serviceAccountName: alchemist-jenkins-acc
       securityContext:
         {{- toYaml .Values.deployment.webapp.podSecurityContext | nindent 8 }}
@@ -49,9 +49,9 @@ spec:
             - webapp
           envFrom:
             - secretRef:
-                name: alchemist-web-new
+                name: alchemist-web
             - configMapRef:
-                name: alchemist-web-new
+                name: alchemist-web
             - configMapRef:
                 name: alchemist-jobs
           ports:
@@ -87,9 +87,9 @@ spec:
               protocol: TCP
           envFrom:
             - secretRef:
-                name: alchemist-web-new
+                name: alchemist-web
             - configMapRef:
-                name: alchemist-web-new
+                name: alchemist-web
             - configMapRef:
                     name: alchemist-jobs
           #          livenessProbe:
