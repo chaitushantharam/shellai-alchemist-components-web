@@ -43,8 +43,8 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.deployment.webapp.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }} | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.deployment.webapp.image.pullPolicy }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - webapp
           envFrom:
@@ -78,7 +78,7 @@ spec:
             {{- toYaml .Values.deployment.webapp.resources | nindent 12 }}
         - name: alchemist-huey
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.deployment.webapp.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - huey
           ports:

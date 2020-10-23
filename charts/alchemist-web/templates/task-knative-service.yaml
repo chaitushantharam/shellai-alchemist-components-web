@@ -12,7 +12,7 @@ spec:
       namespace: alchemist
       name: "{{ .Values.knative.task.name }}-{{ .Values.config.deploymentId }}"
       labels:
-        version: "{{ .Values.knative.task.image.tag }}"
+        version: "{{ .Values.image.tag }}"
       annotations:
         # Knative concurrency-based autoscaling
         autoscaling.knative.dev/class: kpa.autoscaling.knative.dev
