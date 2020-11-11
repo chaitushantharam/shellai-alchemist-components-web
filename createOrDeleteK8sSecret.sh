@@ -97,6 +97,8 @@ function create_secret() {
         --from-literal azure_tenant_id=$(get_secret_from_keyvault "azuretenantid") \
         --from-literal azure_client_secret_mahs=$(get_secret_from_keyvault "azureclientsecretmahs") \
         --from-literal azure_tenant_id_mahs=$(get_secret_from_keyvault "azuretenantidmahs") \
+        --from-literal AZURE_CLIENT_ID_MAHS=$(get_secret_from_keyvault "AZURECLIENTIDMAHS") \
+        --from-literal AZURE_DATALAKE_DEV_MAHS=$(get_secret_from_keyvault "AZUREDATALAKEDEVMAHS") \
         --from-literal celery_broker_url=$(get_secret_from_keyvault "celerybrokerurl") \
         --from-literal REDIS_URL=$(get_secret_from_keyvault "REDISURL") \
         --from-literal SECRET_KEY=$(get_secret_from_keyvault "SECRETKEY") \
