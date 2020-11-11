@@ -31,5 +31,5 @@ spec:
                 memory: 2Gi
               requests:
                 cpu: 4
-                memory: "2Gi
+                memory: 2Gi
           restartPolicy: Never
