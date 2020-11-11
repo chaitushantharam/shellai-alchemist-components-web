@@ -104,6 +104,8 @@ function create_secret() {
         --from-literal zema_username=$(get_secret_from_keyvault "zemausername") \
         --from-literal zema_password=$(get_secret_from_keyvault "zemapassword") \
         --from-literal sqlalchemy_url=$(get_secret_from_keyvault "sqlalchemyurl") \
+        --from-literal DEV_CLUSTER_PRICEVIEWER_USER=$(get_secret_from_keyvault "DEVCLUSTERPRICEVIEWERUSER") \
+        --from-literal DEV_CLUSTER_PRICEVIEWER_PWD=$(get_secret_from_keyvault "DEVCLUSTERPRICEVIEWERPWD") \
         --from-literal sqlalchemy_url_jenkins=$(get_secret_from_keyvault "sqlalchemyurljenkins")
 }
 
