@@ -27,10 +27,10 @@ spec:
                   name: alchemist-jobs
               resources:
                 limits:
-                  cpu: "{{ STATTEST_CPU_LIMITS }}"
-                  memory: "{{ STATTEST_MEMORY_LIMITS }}"
+                  cpu: 4
+                  memory: 2Gi
                 requests:
-                  cpu: "{{ STATTEST_CPU_REQUESTS }}"
-                  memory: "{{ STATTEST_MEMORY_REQUESTS }}"
+                  cpu: 4
+                  memory: "2Gi
           restartPolicy: Never
 
