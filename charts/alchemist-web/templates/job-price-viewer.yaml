@@ -18,7 +18,7 @@ spec:
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             args:
-              - price_viewer
+              - price-viewer
             envFrom:
               - secretRef:
                   name: alchemist-web
