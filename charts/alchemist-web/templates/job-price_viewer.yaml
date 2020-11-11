@@ -1,35 +1,36 @@
-#apiVersion: batch/v1beta1
-#kind: CronJob
-#metadata:
-#  name: price-viewer
-#spec:
-#  schedule: "0 3 * * *"
-#  jobTemplate:
-#    spec:
-#      template:
-#        spec:
-#          containers:
-#          - name: price-viewer
-#            image: "shellai.azurecr.io/alchemist/alchemist-price-viewer-ingestion:{{ .Values.image.tag }}"
-#            args:
-#          restartPolicy: OnFailure
-
-
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: hello
+  name: price-viewer
+  labels:
+    ingestion: price-viewer
 spec:
-  schedule: "*/1 * * * *"
+  schedule: "0 3 * * *"
   jobTemplate:
     spec:
       template:
         spec:
+          imagePullSecrets:
+            - name: shellai-secret
           containers:
-          - name: hello
-            image: busybox
+          - name: price-viewer
+            image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
             args:
-            - /bin/sh
-            - -c
-            - date; echo Hello from the Kubernetes cluster
-          restartPolicy: OnFailure
+              - price_viewer
+            envFrom:
+              - secretRef:
+                  name: alchemist-web
+              - configMapRef:
+                  name: alchemist-web
+              - configMapRef:
+                  name: alchemist-jobs
+              resources:
+                limits:
+                  cpu: "{{ STATTEST_CPU_LIMITS }}"
+                  memory: "{{ STATTEST_MEMORY_LIMITS }}"
+                requests:
+                  cpu: "{{ STATTEST_CPU_REQUESTS }}"
+                  memory: "{{ STATTEST_MEMORY_REQUESTS }}"
+          restartPolicy: Never
+
