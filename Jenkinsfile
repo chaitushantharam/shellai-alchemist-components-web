@@ -174,18 +174,27 @@ def template(String helmOverrides) {
     }
 }
 
+// ONLY CHECKS WEB AND NOT KNATIVE
 def checkDeployment() {
     if (OPERATION != 'delete') {
         sh """
             chmod +x ./deploymentCheck.sh
             ./deploymentCheck.sh --namespace="${NAMESPACE}" --componentname="${COMPONENT}"
-            
-            chmod +x ./removePreviousRevisions.sh
-            ./removePreviousRevisions.sh --namespace="${NAMESPACE}" --componentname="${TASK_COMPONENT}" --deploymentid="${DEPLOYMENT_ID}"
         """
     }
 }
-
+// DO NOT DELETE THE FOLLOWING.  CHECK FOR KNATIVE SERVICE IS CURRENTLY GIVING AN ISSUE DUE TO HUGE DOCKER SIZE AND KNATIVE IS NOT CURRENTLY BEING USED
+// def checkDeployment() {
+//     if (OPERATION != 'delete') {
+//         sh """
+//             chmod +x ./deploymentCheck.sh
+//             ./deploymentCheck.sh --namespace="${NAMESPACE}" --componentname="${COMPONENT}"
+//
+//             chmod +x ./removePreviousRevisions.sh
+//             ./removePreviousRevisions.sh --namespace="${NAMESPACE}" --componentname="${TASK_COMPONENT}" --deploymentid="${DEPLOYMENT_ID}"
+//         """
+//     }
+// }
 def generateHelmOverrides() {
 
     def overrides = []
