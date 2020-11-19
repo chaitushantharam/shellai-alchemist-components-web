@@ -1,3 +1,6 @@
+#This yaml helps to read price viewer data (runs 3AM everyday) using the price viewer dev cluster secrets and
+#writes the data to MAHS PROD DL and DB
+
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
@@ -18,13 +21,41 @@ spec:
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             args:
               - price-viewer
-            envFrom:
-              - secretRef:
-                  name: alchemist-web
-              - configMapRef:
-                  name: alchemist-web
-              - configMapRef:
-                  name: alchemist-jobs
+            env:
+              - name: SQLALCHEMY_URL
+                valueFrom:
+                  secretKeyRef:
+                    name: alchemist-web
+                    key: SQLALCHEMY_URL_JENKINS_DEV
+              - name: ENVIRONMENT
+                value: "DEV"
+              - name: DATALAKE_NAME
+                value: "alchemistadlsdev"
+              - name: AZURE_TENANT_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: alchemist-web
+                    key: azure_tenant_id_mahs
+              - name: AZURE_CLIENT_SECRET
+                valueFrom:
+                  secretKeyRef:
+                    name: alchemist-web
+                    key: azure_client_secret_mahs
+              - name: AZURE_CLIENT_ID
+                valueFrom:
+                  secretKeyRef:
+                    name: alchemist-web
+                    key: azure_client_id_mahs
+              - name: DEV_CLUSTER_PRICEVIEWER_USER
+                valueFrom:
+                  secretKeyRef:
+                    name: alchemist-web
+                    key: DEV_CLUSTER_PRICEVIEWER_USER
+              - name: DEV_CLUSTER_PRICEVIEWER_PWD
+                valueFrom:
+                 secretKeyRef:
+                   name: alchemist-web
+                   key: DEV_CLUSTER_PRICEVIEWER_PWD
             resources:
               limits:
                 cpu: 4
@@ -33,3 +64,5 @@ spec:
                 cpu: 4
                 memory: 2Gi
           restartPolicy: Never
+
+
