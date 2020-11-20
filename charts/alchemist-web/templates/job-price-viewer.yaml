@@ -29,6 +29,8 @@ spec:
                     key: SQLALCHEMY_URL_JENKINS_DEV
               - name: ENVIRONMENT
                 value: "DEV"
+              - name: SQLALCHEMY_SSL
+                value: "TRUE"
               - name: DATALAKE_NAME
                 value: "alchemistadlsdev"
               - name: AZURE_TENANT_ID
