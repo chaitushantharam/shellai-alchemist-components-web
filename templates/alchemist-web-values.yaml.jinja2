@@ -75,11 +75,11 @@ deployment:
     #        - {{ host }}
     resources:
       limits:
-        cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('72', true) }}"
-        memory: "{{ (resources and resources.limits and resources.limits.memory) | default('64Gi', true)  }}"
+        cpu: "{{ (resources and resources.limits and resources.limits.cpu) | default('2', true) }}"
+        memory: "{{ (resources and resources.limits and resources.limits.memory) | default('4Gi', true)  }}"
       requests:
-        cpu: "{{ (resources and resources.requests and resources.requests.cpu) | default('72', true)  }}"
-        memory: "{{ (resources and resources.requests and resources.requests.memory) | default('64Gi', true)  }}"
+        cpu: "{{ (resources and resources.requests and resources.requests.cpu) | default('2', true)  }}"
+        memory: "{{ (resources and resources.requests and resources.requests.memory) | default('4Gi', true)  }}"
     autoscaling:
       enabled: {{ autoscaling and autoscaling.enabled | default(false, true) }}
       minReplicas: {{ autoscaling and autoscaling.minReplicas | default(1, true) }}

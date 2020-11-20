@@ -86,6 +86,7 @@ function create_secret() {
     pretty_print "Creating secret..."
 
 # make sure the key is the same as the environment variable in the code
+# TODO: delete sqlalchymy_url_jenkins environment variable by refactoring the rest of the code to use *JENKINS_DEV OR PROD
 
     kubectl create secret generic "${SECRET_NAME}" \
         --namespace ${NAMESPACE} \
@@ -108,6 +109,8 @@ function create_secret() {
         --from-literal sqlalchemy_url=$(get_secret_from_keyvault "sqlalchemyurl") \
         --from-literal DEV_CLUSTER_PRICEVIEWER_USER=$(get_secret_from_keyvault "DEVCLUSTERPRICEVIEWERUSER") \
         --from-literal DEV_CLUSTER_PRICEVIEWER_PWD=$(get_secret_from_keyvault "DEVCLUSTERPRICEVIEWERPWD") \
+        --from-literal SQLALCHEMY_URL_JENKINS_DEV=$(get_secret_from_keyvault "SQLALCHEMYURLJENKINSDEV") \
+        --from-literal SQLALCHEMY_URL_JENKINS_PROD=$(get_secret_from_keyvault "SQLALCHEMYURLJENKINSPROD") \
         --from-literal sqlalchemy_url_jenkins=$(get_secret_from_keyvault "sqlalchemyurljenkins")
 }
 
