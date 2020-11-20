@@ -45,7 +45,7 @@ spec:
                 valueFrom:
                   secretKeyRef:
                     name: alchemist-web
-                    key: azure_client_id_mahs AZURE_CLIENT_ID_MAHS
+                    key: AZURE_CLIENT_ID_MAHS
               - name: DEV_CLUSTER_PRICEVIEWER_USER
                 valueFrom:
                   secretKeyRef:
