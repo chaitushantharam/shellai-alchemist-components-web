@@ -229,15 +229,15 @@ def createOrDeleteK8sSecret() {
         cmd = """./createOrDeleteK8sSecret.sh --create --namespace="${NAMESPACE}" --keyvaultName="${keyVaultName}" """
     }
 
-    withCredentials([azureServicePrincipal("sp-${LOCATION}-${ENVIRONMENT}")]) {
-        keyVaultName = getKeyVaultName()
-        sh """
-            set +x
-            kubectl config use-context "shellai-${LOCATION}-${ENVIRONMENT}"
-            az login --service-principal --username=${AZURE_CLIENT_ID} --password=${AZURE_CLIENT_SECRET} --tenant=${AZURE_TENANT_ID} > /dev/null
-            ${cmd}
-        """
-    }
+    beagileAzcli.azLogin(LOCATION, ENVIRONMENT)
+
+    keyVaultName = getKeyVaultName()
+
+    sh """
+        set +x
+        kubectl config use-context "shellai-${LOCATION}-${ENVIRONMENT}"
+        ${cmd}
+    """
 }
 
 def dnsify(String aValue) {
