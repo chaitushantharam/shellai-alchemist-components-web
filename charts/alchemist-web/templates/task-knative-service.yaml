@@ -25,10 +25,6 @@ spec:
         autoscaling.knative.dev/maxScale: {{ .Values.knative.task.autoscaling.maxScale | quote }}
     spec:
       serviceAccountName: "{{ .Values.knative.task.name }}"
-      {{- with .Values.imagePullSecrets }}
-      imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
       containers:
           - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             args:
