@@ -109,6 +109,7 @@ function create_secret() {
         --from-literal sqlalchemy_url=$(get_secret_from_keyvault "sqlalchemyurl") \
         --from-literal DEV_CLUSTER_PRICEVIEWER_USER=$(get_secret_from_keyvault "DEVCLUSTERPRICEVIEWERUSER") \
         --from-literal DEV_CLUSTER_PRICEVIEWER_PWD=$(get_secret_from_keyvault "DEVCLUSTERPRICEVIEWERPWD") \
+        --from-literal SQLALCHEMY_SSL=$(get_secret_from_keyvault "SQLALCHEMYSSL") \
         --from-literal SQLALCHEMY_URL_JENKINS_DEV=$(get_secret_from_keyvault "SQLALCHEMYURLJENKINSDEV") \
         --from-literal SQLALCHEMY_URL_JENKINS_PROD=$(get_secret_from_keyvault "SQLALCHEMYURLJENKINSPROD") \
         --from-literal sqlalchemy_url_jenkins=$(get_secret_from_keyvault "sqlalchemyurljenkins")
