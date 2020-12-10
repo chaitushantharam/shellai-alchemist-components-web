@@ -8,8 +8,7 @@ metadata:
   labels:
     ingestion: price-viewer
 spec:
-  schedule: "*/10 * * * *"
-
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       template:
