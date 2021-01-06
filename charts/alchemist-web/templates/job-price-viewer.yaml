@@ -4,9 +4,9 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: price-viewer5
+  name: price-viewer
   labels:
-    ingestion: price-viewer5
+    ingestion: price-viewer
 spec:
   schedule: "0 3 * * *"
   jobTemplate:
