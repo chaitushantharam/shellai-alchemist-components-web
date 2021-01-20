@@ -60,10 +60,10 @@ spec:
                    key: DEV_CLUSTER_PRICEVIEWER_PWD
             resources:
               limits:
-                cpu: 4
+                cpu: 2
                 memory: 2Gi
               requests:
-                cpu: 4
+                cpu: 2
                 memory: 2Gi
           restartPolicy: Never
 
