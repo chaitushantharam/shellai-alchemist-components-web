@@ -4,7 +4,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: price-viewer
+  name: price-viewer-and-ccf
   labels:
     ingestion: price-viewer-and-ccf
 spec:
