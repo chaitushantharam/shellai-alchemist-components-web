@@ -4,7 +4,7 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: price-viewer-and-ccf2
+  name: price-viewer-and-ccf
   labels:
     ingestion: price-viewer-and-ccf
 spec:
@@ -20,7 +20,7 @@ spec:
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             args:
-              - price-viewer
+              - price-viewer-and-ccf
             env:
               - name: SQLALCHEMY_URL
                 valueFrom:
