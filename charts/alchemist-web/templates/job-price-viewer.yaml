@@ -6,7 +6,7 @@ kind: CronJob
 metadata:
   name: price-viewer
   labels:
-    ingestion: price-viewer
+    ingestion: price-viewer-and-ccf
 spec:
   schedule: "0 3 * * *"
   jobTemplate:
