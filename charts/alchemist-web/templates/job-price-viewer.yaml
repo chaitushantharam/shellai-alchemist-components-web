@@ -16,7 +16,7 @@ spec:
           imagePullSecrets:
           - name: shellai-secret
           containers:
-          - name: price-viewer
+          - name: price-viewer-and-ccf
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             args:
