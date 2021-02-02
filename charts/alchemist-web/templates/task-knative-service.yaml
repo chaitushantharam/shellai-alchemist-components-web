@@ -20,7 +20,7 @@ spec:
         # Target number of in-flight requests per pod.
         autoscaling.knative.dev/target: {{ .Values.knative.task.autoscaling.inflightRequests | quote }}
         # Enable scale to zero by commenting out minScale
-        autoscaling.knative.dev/minScale: {{ .Values.knative.task.autoscaling.minScale | quote }}
+#        autoscaling.knative.dev/minScale: {{ .Values.knative.task.autoscaling.minScale | quote }}
         # Limit scaling to 10 pods.
         autoscaling.knative.dev/maxScale: {{ .Values.knative.task.autoscaling.maxScale | quote }}
     spec:
