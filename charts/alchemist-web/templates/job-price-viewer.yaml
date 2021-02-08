@@ -4,9 +4,9 @@
 apiVersion: batch/v1beta1
 kind: CronJob
 metadata:
-  name: price-viewer-and-ccf
+  name: price-viewer
   labels:
-    ingestion: price-viewer-and-ccf
+    ingestion: price-viewer
 spec:
   schedule: "0 3 * * *"
   jobTemplate:
@@ -16,11 +16,11 @@ spec:
           imagePullSecrets:
           - name: shellai-secret
           containers:
-          - name: price-viewer-and-ccf
+          - name: price-viewer
             image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
             imagePullPolicy: {{ .Values.image.pullPolicy }}
             args:
-              - price-viewer-and-ccf
+              - price-viewer
             env:
               - name: SQLALCHEMY_URL
                 valueFrom:
