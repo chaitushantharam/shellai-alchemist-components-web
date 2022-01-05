@@ -2,7 +2,7 @@
 // TODO: can we use application user's handle rather than personal handle??
  
 // Applicable shared libraries 
-@Library(value="shellai-jenkins-shared-lib@YOUR_BRANCH_HERE", changelog=true)
+@Library(value="shellai-jenkins-shared-lib@master", changelog=true)
 
 // Constants
 DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.6.1'
@@ -292,7 +292,7 @@ def aksLogin(String containerName) {
         echo "[Info] Changing AZ subscription"
         az account set --subscription ${environmentInfo.subscriptionId}
         echo "[Info] Retrieving Kubeconfig"
-        az aks get-credentials --admin --resource-group ${LOCATION}-${ENVIRONMENT}-platform-aks-rg --name ${LOCATION}-${ENVIRONMENT} --context ${LOCATION}-${ENVIRONMENT} --overwrite-existing
+        az aks get-credentials --resource-group ${LOCATION}-${ENVIRONMENT}-platform-aks-rg --name ${LOCATION}-${ENVIRONMENT} --context ${LOCATION}-${ENVIRONMENT} --overwrite-existing
         kubectl config get-contexts
         """
         }
