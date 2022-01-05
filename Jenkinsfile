@@ -176,7 +176,7 @@ def template(String helmOverrides) {
             --createdBy "helm" \
             --outfile ${ENVIRONMENT}_${TEMPLATED_FILE}
             
-            kubectl config use-context "shellai-${LOCATION}-${ENVIRONMENT}"
+            kubectl config use-context "${LOCATION}-${ENVIRONMENT}"
 
             ./shellai-jenkins-shared-lib/utilities/helm_deploy.py \
             --namespace ${NAMESPACE} \
