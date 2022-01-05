@@ -13,8 +13,8 @@ CHART_PATH = './charts/'
 COMPONENT = 'alchemist-web'
 TASK_COMPONENT = 'alchemist-task'
 CHART_NAME = COMPONENT
-LOCATIONS = 'westeurope'
-ENVIRONMENTS = 'dev'
+LOCATION = 'westeurope'
+ENVIRONMENT = 'dev'
 OPERATIONS = ['upgrade', 'rollback', 'delete']
 SHELLAI_SHARED_LIB_TAG = 'stable'
 CONTAINER_NAME = deployerContainerName()
@@ -34,12 +34,12 @@ pipeline {
     parameters {
         choice(
                 name: 'LOCATION',
-                choices: LOCATIONS,
+                choices: LOCATION,
                 description: 'Location to deploy to'
         )
         choice(
                 name: 'ENVIRONMENT',
-                choices: ENVIRONMENTS,
+                choices: ENVIRONMENT,
                 description: 'Environment to deploy to'
         )
         choice(
