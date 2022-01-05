@@ -1,11 +1,5 @@
-// this file helps to use AKS cluster (note: the previous one is now renamed to kubespray_jenkinsfile)
-// TODO: can we use application user's handle rather than personal handle??
- 
-// Applicable shared libraries 
-@Library(value="shellai-jenkins-shared-lib@YOUR_BRANCH_HERE", changelog=true)
-
 // Constants
-DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.6.1'
+DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.5.0'
 OWNER = 'alchemist'
 NAMESPACE = 'alchemist'
 TEMPLATED_FILE = 'templated.yaml'
@@ -64,24 +58,17 @@ pipeline {
                 description: 'APPROVAL for Component deployment'
         )
     }
-    
+
     stages {
         stage('Prepare') {
             steps {
-                script {
-                    aksLogin(CONTAINER_NAME)
-                    addGitCredentials(CONTAINER_NAME)
-                    container(CONTAINER_NAME) {
-                        sh """
-                            git clone -b ${SHELLAI_SHARED_LIB_TAG} -c advice.detachedHead=false  https://github.com/shellagilehub/shellai-jenkins-shared-lib
-                        """
-                    }
-
+                setKubeconfig(CONTAINER_NAME)
+                addGitCredentials(CONTAINER_NAME)
+                container(CONTAINER_NAME) {
+                    sh "git clone -b ${SHELLAI_SHARED_LIB_TAG} --single-branch https://github.com/shellagilehub/shellai-jenkins-shared-lib"
                 }
             }
         }
-
-    
 
         stage('PlanEnv') {
             steps {
@@ -272,29 +259,4 @@ def getKeyVaultName() {
         SHORT_TEAM = NAMESPACE
     KEYVAULT_NAME = "${SHORT_LOCATION}${SHORT_ENVIRONMENT}${SHORT_TEAM}kv"
     return KEYVAULT_NAME
-}
-
-// [note copied from https://github.com/sede-x/be.agile/blob/master/docs/aks-migration-guide/python-flask-app/README.md and 
-// https://github.com/shellagilehub/beagile-examples-python-flask-app/blob/master/Jenkinsfile]
-// NOTE: This function will eventually be copied to Frontera release management v2 https://github.com/sede-x/beagile-frontera-release-management-jsl
-def aksLogin(String containerName) {
-    ShellAiEnvironment environmentInfo = ShellAi.environmentInfo(ENVIRONMENT)
-
-    container(containerName) {
-        withCredentials([sshUserPrivateKey(
-            credentialsId: "sp-${LOCATION}-${ENVIRONMENT}-pem",
-            keyFileVariable: 'AZ_PASSWORD',
-            usernameVariable: 'AZ_USERNAME'
-        )]) {
-        sh """
-        echo "[Info] Performing AZ login"
-        az login --service-principal -u ${AZ_USERNAME} -p ${AZ_PASSWORD} --tenant ${environmentInfo.tenantId}
-        echo "[Info] Changing AZ subscription"
-        az account set --subscription ${environmentInfo.subscriptionId}
-        echo "[Info] Retrieving Kubeconfig"
-        az aks get-credentials --admin --resource-group ${LOCATION}-${ENVIRONMENT}-platform-aks-rg --name ${LOCATION}-${ENVIRONMENT} --context ${LOCATION}-${ENVIRONMENT} --overwrite-existing
-        kubectl config get-contexts
-        """
-        }
-    }
 }

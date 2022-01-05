@@ -1,11 +1,9 @@
-// this file helps to use AKS cluster (note: the previous one is now renamed to kubespray_jenkinsfile)
-// TODO: can we use application user's handle rather than personal handle??
- 
-// Applicable shared libraries 
-@Library(value="shellai-jenkins-shared-lib@YOUR_BRANCH_HERE", changelog=true)
+@Library('release-management-jsl@master', 'shellai-jenkins-shared-lib') _
+
+rm = getReleaseManagement()
 
 // Constants
-DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.6.1'
+// DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.5.0'
 OWNER = 'alchemist'
 NAMESPACE = 'alchemist'
 TEMPLATED_FILE = 'templated.yaml'
@@ -14,21 +12,29 @@ COMPONENT = 'alchemist-web'
 TASK_COMPONENT = 'alchemist-task'
 CHART_NAME = COMPONENT
 LOCATIONS = ShellAi.locations()
-ENVIRONMENTS = ShellAi.environments()
+ENVIRONMENTS = rm.getTargets(clouds: "azure", envs: ["dev", "staging", "prod"], artefacts: false)
 OPERATIONS = ['upgrade', 'rollback', 'delete']
 SHELLAI_SHARED_LIB_TAG = 'stable'
 CONTAINER_NAME = deployerContainerName()
 DEPLOYMENT_ID = ''
 
+pipeline = [
+    team: 'alchemist',
+    name: 'alchemist-web'
+
+]
+
 pipeline {
     options {
         disableConcurrentBuilds()
+        timeout(time: 1, unit: "HOURS")
     }
     agent {
         kubernetes {
-            label deployerContainerName()
-            defaultContainer 'jnlp'
-            yaml shellaiDeployerYaml(CONTAINER_NAME, DEPLOYER_IMAGE)
+            label rm.getLabel()
+            cloud rm.getCloud()
+            defaultContainer "deployer"
+            yaml rm.getPod(containers: ["deployer"], debug: true)
         }
     }
     parameters {
@@ -64,28 +70,45 @@ pipeline {
                 description: 'APPROVAL for Component deployment'
         )
     }
-    
+
     stages {
         stage('Prepare') {
             steps {
+                // setKubeconfig(CONTAINER_NAME)
+                // addGitCredentials(CONTAINER_NAME)
+                // container(CONTAINER_NAME) {
+                //     sh "git clone -b ${SHELLAI_SHARED_LIB_TAG} --single-branch https://github.com/shellagilehub/shellai-jenkins-shared-lib"
+                // }
                 script {
-                    aksLogin(CONTAINER_NAME)
-                    addGitCredentials(CONTAINER_NAME)
-                    container(CONTAINER_NAME) {
-                        sh """
-                            git clone -b ${SHELLAI_SHARED_LIB_TAG} -c advice.detachedHead=false  https://github.com/shellagilehub/shellai-jenkins-shared-lib
-                        """
-                    }
+                    // Determine cloud and step
+                    def (cloud, step) = rm.repo.branch.split("_")
 
+                    // Initialize pipeline
+                    rm.init(pipeline: [
+                        cloud : cloud,
+                        step  : step
+                    ] + pipeline)
+
+                    // Changeset
+                    if (rm.isManualBuild()) {
+                        println "== Manual trigger"
+                        DEPLOY = true
+                    }
+                    else if (rm.changesetMatch("${rm.config.pipeline.terraformPath}/${rm.config.pipeline.step}/.*")) {
+                        println "== Changeset matches"
+                        DEPLOY = true
+                    }
+                    else {
+                        println "== Skipping deployment"
+                        DEPLOY = false
+                    }
                 }
             }
         }
 
-    
-
         stage('PlanEnv') {
             steps {
-                container(CONTAINER_NAME) {
+                container(rm.getLabel()) {
                     script {
                         String helmOverrides = generateHelmOverrides()
                         template(helmOverrides)
@@ -109,44 +132,91 @@ pipeline {
         }
 
         stage('DeployEnv') {
-            when { not { buildingTag() } }
+            when {
+                beforeAgent true
+                expression { DEPLOY }
+            }
             steps {
-                container(CONTAINER_NAME) {
-                    script {
-                        deploy()
+                script {
+                    // Authenticate to GitHub
+                    rm.github.auth()
+
+                    // Add HelloCloud chart to helm repository
+                    sh("helm3 repo add '${rm.config.helm.alchemist.repoName}' '${rm.config.helm.alchemist.repoUrl}@${rm.config.helm.alchemist.chartName}?ref=${rm.config.helm.alchemist.chartVersion}'")
+
+                    // Vault authentication
+                    rm.vault.auth()
+
+                    //TODO: old way, fix it after proper onboarding from Trinity 
+                    // Authenticate to Azure
+                    //  azureAuth = rm.azure.auth()
+                    // Fetch Azure Kubernetes configuration
+                    //  rm.azure.getKubeconfig()
+
+                    //Workaround
+                    azureAuth = rm.azure.auth()
+                    rm.azure.getKubeconfig(aks: true)
+                    rm.setPipeline([
+                        admin: false
+                    ])
+                    rm.azure.auth()
+                    rm.github.auth()
+
+                    // Prepare TFE requirements
+                    rm.tfe.prepare()
+
+                    println "== Pull Helm chart into main terraform folder"
+                    sh("helm3 pull '${rm.config.helm.alchemist.repoName}/${rm.config.helm.alchemist.chartName}' --untar --untardir ${rm.config.pipeline.terraformPath}/")
+
+                    println "== Copy environment-specific terraform code into main terraform folder"
+                    sh("cp -vr ${rm.config.pipeline.terraformPath}/${rm.config.pipeline.step}/* ${rm.config.pipeline.terraformPath}/")
+                                        
+                    // Optional approval gate
+                    if (rm.config.pipeline.approval) {
+                        println "== Plan Terraform"
+                        if (!rm.tfe.plan()) {
+                            error("Terraform plan failed!")
+                        }
+                        timeout(time: 10, unit: "MINUTES") {
+                            input(id: "Deploy", message: "Apply Terraform?", ok: "Apply")
+                        }
+                    }
+
+                    println "== Deploy Terraform"
+                    if (!rm.tfe.deploy()) {
+                        error("Terraform deploy failed!")
                     }
                 }
-            }
         }
     }
 }
 
-def deploy() {
-    script {
-        echo "APPROVAL_GATE:$APPROVAL_GATE"
-        if (APPROVAL_GATE && (APPROVAL_GATE == true || APPROVAL_GATE == "true")) {
-            approvalPrompt("Deploy to ${LOCATION}/${ENVIRONMENT}?")
-        } else {
-            echo "Skipping approval step..."
-        }
-    }
+// def deploy() {
+//     script {
+//         echo "APPROVAL_GATE:$APPROVAL_GATE"
+//         if (APPROVAL_GATE && (APPROVAL_GATE == true || APPROVAL_GATE == "true")) {
+//             approvalPrompt("Deploy to ${LOCATION}/${ENVIRONMENT}?")
+//         } else {
+//             echo "Skipping approval step..."
+//         }
+//     }
 
-    container(CONTAINER_NAME) {
+//     container(CONTAINER_NAME) {
 
-        createOrDeleteK8sSecret()
+//         createOrDeleteK8sSecret()
 
-        sh """
-            ./shellai-jenkins-shared-lib/utilities/helm_deploy.py \
-            --namespace ${NAMESPACE} \
-            --chartName ${COMPONENT} \
-            --chartPath "./finalcharts/${COMPONENT}" \
-            --operation ${OPERATION} \
-            --revision ${REVISION}
-        """
+//         sh """
+//             ./shellai-jenkins-shared-lib/utilities/helm_deploy.py \
+//             --namespace ${NAMESPACE} \
+//             --chartName ${COMPONENT} \
+//             --chartPath "./finalcharts/${COMPONENT}" \
+//             --operation ${OPERATION} \
+//             --revision ${REVISION}
+//         """
 
-        checkDeployment()
-    }
-}
+//         checkDeployment()
+//     }
+// }
 
 def template(String helmOverrides) {
 
@@ -272,29 +342,4 @@ def getKeyVaultName() {
         SHORT_TEAM = NAMESPACE
     KEYVAULT_NAME = "${SHORT_LOCATION}${SHORT_ENVIRONMENT}${SHORT_TEAM}kv"
     return KEYVAULT_NAME
-}
-
-// [note copied from https://github.com/sede-x/be.agile/blob/master/docs/aks-migration-guide/python-flask-app/README.md and 
-// https://github.com/shellagilehub/beagile-examples-python-flask-app/blob/master/Jenkinsfile]
-// NOTE: This function will eventually be copied to Frontera release management v2 https://github.com/sede-x/beagile-frontera-release-management-jsl
-def aksLogin(String containerName) {
-    ShellAiEnvironment environmentInfo = ShellAi.environmentInfo(ENVIRONMENT)
-
-    container(containerName) {
-        withCredentials([sshUserPrivateKey(
-            credentialsId: "sp-${LOCATION}-${ENVIRONMENT}-pem",
-            keyFileVariable: 'AZ_PASSWORD',
-            usernameVariable: 'AZ_USERNAME'
-        )]) {
-        sh """
-        echo "[Info] Performing AZ login"
-        az login --service-principal -u ${AZ_USERNAME} -p ${AZ_PASSWORD} --tenant ${environmentInfo.tenantId}
-        echo "[Info] Changing AZ subscription"
-        az account set --subscription ${environmentInfo.subscriptionId}
-        echo "[Info] Retrieving Kubeconfig"
-        az aks get-credentials --admin --resource-group ${LOCATION}-${ENVIRONMENT}-platform-aks-rg --name ${LOCATION}-${ENVIRONMENT} --context ${LOCATION}-${ENVIRONMENT} --overwrite-existing
-        kubectl config get-contexts
-        """
-        }
-    }
 }
