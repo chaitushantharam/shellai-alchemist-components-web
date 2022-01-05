@@ -3,6 +3,8 @@
  
 // Applicable shared libraries 
 @Library(value="shellai-jenkins-shared-lib@master", changelog=true)
+import com.shell.shellai.enums.ShellAiEnvironment
+import static com.shell.shellai.CommonUtils.*
 
 // Constants
 DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.6.1'
