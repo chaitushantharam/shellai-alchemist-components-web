@@ -90,8 +90,7 @@ pipeline {
                 container(CONTAINER_NAME) {
                     script {
                         String helmOverrides = generateHelmOverrides()
-                        echo "aaabbbccc"
-                        echo " " + template(helmOverrides)
+                        template(helmOverrides)
                     }
                 }
             }
