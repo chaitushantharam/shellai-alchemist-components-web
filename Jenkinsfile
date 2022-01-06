@@ -295,7 +295,7 @@ def aksLogin(String containerName) {
         echo "[Info] Changing AZ subscription"
         az account set --subscription ${environmentInfo.subscriptionId}
         echo "[Info] Retrieving Kubeconfig"
-        az aks get-credentials --admin --resource-group ${LOCATION}-${ENVIRONMENT}-platform-aks-rg --name ${LOCATION}-${ENVIRONMENT} --context ${LOCATION}-${ENVIRONMENT} --overwrite-existing
+        az aks get-credentials --resource-group ${LOCATION}-${ENVIRONMENT}-platform-aks-rg --name ${LOCATION}-${ENVIRONMENT} --context ${LOCATION}-${ENVIRONMENT} --overwrite-existing
         kubectl config get-contexts
         """
         }
