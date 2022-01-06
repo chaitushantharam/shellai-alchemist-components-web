@@ -161,7 +161,7 @@ def template(String helmOverrides) {
             echo "[INFO] Helm Version:"
             helm version
 
-            echo ./shellai-jenkins-shared-lib/utilities/generate_manifest.py \
+            ./shellai-jenkins-shared-lib/utilities/generate_manifest.py \
             --template "./templates/${COMPONENT}-values.yaml.jinja2" \
             --data "values_data.yaml" \
             --setkeys "${helmOverrides}" \
