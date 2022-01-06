@@ -91,7 +91,7 @@ pipeline {
                     script {
                         String helmOverrides = generateHelmOverrides()
                         echo "aaabbbccc"
-                        echo template(helmOverrides)
+                        echo " " + template(helmOverrides)
                     }
                 }
             }
@@ -162,7 +162,7 @@ def template(String helmOverrides) {
             echo "[INFO] Helm Version:"
             helm version
 
-            ./shellai-jenkins-shared-lib/utilities/generate_manifest.py \
+            echo ./shellai-jenkins-shared-lib/utilities/generate_manifest.py \
             --template "./templates/${COMPONENT}-values.yaml.jinja2" \
             --data "values_data.yaml" \
             --setkeys "${helmOverrides}" \
