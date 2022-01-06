@@ -174,8 +174,9 @@ def template(String helmOverrides) {
             --costcenter "none" \
             --owner "${OWNER}" \
             --createdBy "helm" \
-            --debug \
             --outfile ${ENVIRONMENT}_${TEMPLATED_FILE}
+
+            echo ${ENVIRONMENT}_${TEMPLATED_FILE}
             
             kubectl config use-context "${LOCATION}-${ENVIRONMENT}"
 
