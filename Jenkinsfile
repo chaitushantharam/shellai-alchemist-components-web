@@ -250,6 +250,8 @@ def createOrDeleteK8sSecret() {
     beagileAzcli.azLogin(LOCATION, ENVIRONMENT)
 
     keyVaultName = getKeyVaultName()
+    echo "keykeykey"
+    echo keyVaultName
 
     sh """
         set +x
@@ -276,8 +278,6 @@ def getKeyVaultName() {
     else
         SHORT_TEAM = NAMESPACE
     KEYVAULT_NAME = "${SHORT_LOCATION}${SHORT_ENVIRONMENT}${SHORT_TEAM}kv"
-    echo "keykeykey"
-    echo KEYVAULT_NAME
     return KEYVAULT_NAME
 }
 
