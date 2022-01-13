@@ -155,6 +155,7 @@ def deploy() {
                 """
     }
 }
+}
 
 def template(String helmOverrides) {
 
