@@ -2,12 +2,12 @@
 // TODO: can we use application user's handle rather than personal handle??
  
 // Applicable shared libraries 
-@Library(value="shellai-jenkins-shared-lib@master", changelog=true)
+@Library(value="shellai-jenkins-shared-lib@1.0.49", changelog=true)
 import com.shell.shellai.enums.ShellAiEnvironment
 import static com.shell.shellai.CommonUtils.*
 
 // Constants
-DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.6.1'
+DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.7.0'
 OWNER = 'alchemist'
 NAMESPACE = 'alchemist'
 TEMPLATED_FILE = 'templated.yaml'
@@ -71,8 +71,9 @@ pipeline {
         stage('Prepare') {
             steps {
                 script {
-                    aksLogin(CONTAINER_NAME)
+                    // aksLogin(CONTAINER_NAME)
                     addGitCredentials(CONTAINER_NAME)
+                    setKubeconfig(CONTAINER_NAME)
                     container(CONTAINER_NAME) {
                         sh """
                             git clone -b ${SHELLAI_SHARED_LIB_TAG} -c advice.detachedHead=false  https://github.com/shellagilehub/shellai-jenkins-shared-lib
@@ -250,8 +251,6 @@ def createOrDeleteK8sSecret() {
     beagileAzcli.azLogin(LOCATION, ENVIRONMENT)
 
     keyVaultName = getKeyVaultName()
-    echo "keykeykey"
-    echo keyVaultName
 
     sh """
         set +x
@@ -284,6 +283,9 @@ def getKeyVaultName() {
 // [note copied from https://github.com/sede-x/be.agile/blob/master/docs/aks-migration-guide/python-flask-app/README.md and 
 // https://github.com/shellagilehub/beagile-examples-python-flask-app/blob/master/Jenkinsfile]
 // NOTE: This function will eventually be copied to Frontera release management v2 https://github.com/sede-x/beagile-frontera-release-management-jsl
+// TODO: we are not using the aksLogin for now; This will be used once alchemist gets migrated to 
+// Hashicorp vault to avail the kubeconfig directly. Meanwhile we will continue to use the setKubeconfig() from the
+// shared library
 def aksLogin(String containerName) {
     ShellAiEnvironment environmentInfo = ShellAi.environmentInfo(ENVIRONMENT)
 
