@@ -182,9 +182,6 @@ def template(String helmOverrides) {
             --owner "${OWNER}" \
             --createdBy "helm" \
             --outfile ${ENVIRONMENT}_${TEMPLATED_FILE}
-
-            // echo "templated..."
-            // cat dev_templated.yaml
             
             kubectl config use-context "${LOCATION}-${ENVIRONMENT}"
 
