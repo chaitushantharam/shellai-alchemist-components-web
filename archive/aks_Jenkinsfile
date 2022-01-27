@@ -1,5 +1,13 @@
+// this file helps to use AKS cluster (note: the previous one is now renamed to kubespray_jenkinsfile)
+// TODO: can we use application user's handle rather than personal handle??
+ 
+// Applicable shared libraries 
+@Library(value="shellai-jenkins-shared-lib@1.0.49", changelog=true)
+import com.shell.shellai.enums.ShellAiEnvironment
+import static com.shell.shellai.CommonUtils.*
+
 // Constants
-DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.5.0'
+DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.7.0'
 OWNER = 'alchemist'
 NAMESPACE = 'alchemist'
 TEMPLATED_FILE = 'templated.yaml'
@@ -7,8 +15,8 @@ CHART_PATH = './charts/'
 COMPONENT = 'alchemist-web'
 TASK_COMPONENT = 'alchemist-task'
 CHART_NAME = COMPONENT
-LOCATIONS = ShellAi.locations()
-ENVIRONMENTS = ShellAi.environments()
+LOCATION = 'westeurope'
+ENVIRONMENT = 'dev'
 OPERATIONS = ['upgrade', 'rollback', 'delete']
 SHELLAI_SHARED_LIB_TAG = 'stable'
 CONTAINER_NAME = deployerContainerName()
@@ -28,12 +36,12 @@ pipeline {
     parameters {
         choice(
                 name: 'LOCATION',
-                choices: LOCATIONS,
+                choices: LOCATION,
                 description: 'Location to deploy to'
         )
         choice(
                 name: 'ENVIRONMENT',
-                choices: ENVIRONMENTS,
+                choices: ENVIRONMENT,
                 description: 'Environment to deploy to'
         )
         choice(
@@ -58,17 +66,25 @@ pipeline {
                 description: 'APPROVAL for Component deployment'
         )
     }
-
+    
     stages {
         stage('Prepare') {
             steps {
-                setKubeconfig(CONTAINER_NAME)
-                addGitCredentials(CONTAINER_NAME)
-                container(CONTAINER_NAME) {
-                    sh "git clone -b ${SHELLAI_SHARED_LIB_TAG} --single-branch https://github.com/shellagilehub/shellai-jenkins-shared-lib"
+                script {
+                    // aksLogin(CONTAINER_NAME)
+                    addGitCredentials(CONTAINER_NAME)
+                    setKubeconfig(CONTAINER_NAME)
+                    container(CONTAINER_NAME) {
+                        sh """
+                            git clone -b ${SHELLAI_SHARED_LIB_TAG} -c advice.detachedHead=false  https://github.com/shellagilehub/shellai-jenkins-shared-lib
+                        """
+                    }
+
                 }
             }
         }
+
+    
 
         stage('PlanEnv') {
             steps {
@@ -131,8 +147,14 @@ def deploy() {
             --revision ${REVISION}
         """
 
-        checkDeployment()
+        // checkDeployment()
+         if (OPERATION != 'delete') {
+             sh """
+                chmod +x ./deploymentCheck.sh
+                ./deploymentCheck.sh --component=$COMPONENT --namespace=$NAMESPACE --hostname=flaskapp.dev.aze.shell.io
+                """
     }
+}
 }
 
 def template(String helmOverrides) {
@@ -161,7 +183,7 @@ def template(String helmOverrides) {
             --createdBy "helm" \
             --outfile ${ENVIRONMENT}_${TEMPLATED_FILE}
             
-            kubectl config use-context "shellai-${LOCATION}-${ENVIRONMENT}"
+            kubectl config use-context "${LOCATION}-${ENVIRONMENT}"
 
             ./shellai-jenkins-shared-lib/utilities/helm_deploy.py \
             --namespace ${NAMESPACE} \
@@ -259,4 +281,32 @@ def getKeyVaultName() {
         SHORT_TEAM = NAMESPACE
     KEYVAULT_NAME = "${SHORT_LOCATION}${SHORT_ENVIRONMENT}${SHORT_TEAM}kv"
     return KEYVAULT_NAME
+}
+
+// [note copied from https://github.com/sede-x/be.agile/blob/master/docs/aks-migration-guide/python-flask-app/README.md and 
+// https://github.com/shellagilehub/beagile-examples-python-flask-app/blob/master/Jenkinsfile]
+// NOTE: This function will eventually be copied to Frontera release management v2 https://github.com/sede-x/beagile-frontera-release-management-jsl
+// TODO: we are not using the aksLogin for now; This will be used once alchemist gets migrated to 
+// Hashicorp vault to avail the kubeconfig directly. Meanwhile we will continue to use the setKubeconfig() from the
+// shared library
+def aksLogin(String containerName) {
+    ShellAiEnvironment environmentInfo = ShellAi.environmentInfo(ENVIRONMENT)
+
+    container(containerName) {
+        withCredentials([sshUserPrivateKey(
+            credentialsId: "sp-${LOCATION}-${ENVIRONMENT}-pem",
+            keyFileVariable: 'AZ_PASSWORD',
+            usernameVariable: 'AZ_USERNAME'
+        )]) {
+        sh """
+        echo "[Info] Performing AZ login"
+        az login --service-principal -u ${AZ_USERNAME} -p ${AZ_PASSWORD} --tenant ${environmentInfo.tenantId}
+        echo "[Info] Changing AZ subscription"
+        az account set --subscription ${environmentInfo.subscriptionId}
+        echo "[Info] Retrieving Kubeconfig"
+        az aks get-credentials --resource-group ${LOCATION}-${ENVIRONMENT}-platform-aks-rg --name ${LOCATION}-${ENVIRONMENT} --context ${LOCATION}-${ENVIRONMENT} --overwrite-existing
+        kubectl config get-contexts
+        """
+        }
+    }
 }
