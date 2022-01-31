@@ -160,6 +160,9 @@ def template(String helmOverrides) {
             --owner "${OWNER}" \
             --createdBy "helm" \
             --outfile ${ENVIRONMENT}_${TEMPLATED_FILE}
+
+            echo "TODO: delete me"
+            cat dev_templated.yaml
             
             kubectl config use-context "shellai-${LOCATION}-${ENVIRONMENT}"
 
