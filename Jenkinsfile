@@ -7,8 +7,8 @@ CHART_PATH = './charts/'
 COMPONENT = 'alchemist-web'
 TASK_COMPONENT = 'alchemist-task'
 CHART_NAME = COMPONENT
-LOCATIONS = 'westeurope'
-ENVIRONMENTS = 'dev'
+LOCATIONS = ShellAi.locations()
+ENVIRONMENTS = ShellAi.environments()
 OPERATIONS = ['upgrade', 'rollback', 'delete']
 SHELLAI_SHARED_LIB_TAG = 'stable'
 CONTAINER_NAME = deployerContainerName()
@@ -160,9 +160,6 @@ def template(String helmOverrides) {
             --owner "${OWNER}" \
             --createdBy "helm" \
             --outfile ${ENVIRONMENT}_${TEMPLATED_FILE}
-
-            echo "TODO: delete me"
-            cat dev_templated.yaml
             
             kubectl config use-context "shellai-${LOCATION}-${ENVIRONMENT}"
 
