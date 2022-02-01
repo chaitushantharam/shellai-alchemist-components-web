@@ -1,5 +1,5 @@
 // Constants
-DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.5.0'
+DEPLOYER_IMAGE = 'shellai.azurecr.io/shellai-deployer:0.6.1'
 OWNER = 'alchemist'
 NAMESPACE = 'alchemist'
 TEMPLATED_FILE = 'templated.yaml'
